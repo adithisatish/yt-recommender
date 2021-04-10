@@ -107,9 +107,12 @@ class recommendation_system:
         sorted_scores = sorted(similarity, key = lambda x: x[1], reverse=True)
         try:
             sim_scores = sorted_scores[1:11] # Top 10 recommended
+            if sim_scores == []:
+                self.error("No recommendations found!",None)
+
         except Exception as e:
-            if len(sorted_scores<11):
-                sim_scores = sorted_scores[1:-1]
+            self.error("Recommendations not found!", e)
+        
         video_titles = [i[0] for i in sim_scores]
         return list(videos['Video Title'].iloc[video_titles])
 
