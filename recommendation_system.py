@@ -129,7 +129,7 @@ class recommendation_system:
 
 if __name__=='__main__':
     try:
-        dataset = sys.argv[1]
+        dataset = "data/" + sys.argv[1]
         recommender = recommendation_system(dataset)
         video = sys.argv[2]
     except Exception as e:
