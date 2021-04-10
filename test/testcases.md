@@ -40,7 +40,7 @@
         Input: python3 recommendation_system.py "test_videos.csv" "15 Business Books Everyone Should Read"
         Output: List of 7 recommendations
 
-8. No recommendations returned
+8.  No recommendations returned
    
         Input: python3 recommendation_system.py "zero_rec.csv" "15 Business Books Everyone Should Read"
         Output: Error! No recommendations found!
@@ -52,4 +52,8 @@
         Output: Error! Preprocessing failed - attribute mismatch!
         Terminating Program...
         
-10. 
+10. Iterative recommendation
+   
+        Input: User provides list of unsatisfactory recommendations
+        Output: New set of recommendations with the unsatisfactory ones removed
+

@@ -19,6 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 import sys
 import time
+import os
 
 class recommendation_system:
 
@@ -77,8 +78,8 @@ class recommendation_system:
     def score_att(self, view, likes, dislikes): # to score based on quality of video
         return (likes + dislikes)/view
 
-    def get_recommendations(self, title):
-        videos = self.preprocess(self.dataset)
+    def get_recommendations(self, title, dataset):
+        videos = self.preprocess(dataset)
         
         index = videos[videos['Video Title']==title].index.values
         if list(index) == []:
@@ -116,6 +117,40 @@ class recommendation_system:
         video_titles = [i[0] for i in sim_scores]
         return list(videos['Video Title'].iloc[video_titles])
 
+    def iterative_recommender(self, dataset, title):
+        recommendations = self.get_recommendations(video, self.dataset)
+        user_opinion = "Y" # Happy with recommendations
+        if video in recommendations:
+            recommendations.remove(video)
+        print("Recommendations: ")
+        print("-----------------------------------------------")
+        for video_title in recommendations: 
+            print(video_title)
+
+        user_opinion = input("Are you satisfied with the recommendations? (Y/N)")
+        
+        while user_opinion != 'Y':
+            bad_recs = input("Enter all unsatisfactory recommendation numbers (starting from 1) separated by comma: ").split(',')
+            # print(bad_recs)
+            
+            for i in bad_recs:
+                dataset = dataset[dataset['Video Title']!=recommendations[int(i)]]
+
+            recommendations = self.get_recommendations(video, dataset)
+            # user_opinion = "Y" # Happy with recommendations
+            if video in recommendations:
+                recommendations.remove(video)
+
+            os.system('cls')
+            print("Video:",video)
+            print("Recommendations: ")
+            print("-----------------------------------------------")
+            for video_title in recommendations: 
+                print(video_title)
+            
+            user_opinion = input("Are you satisfied with the recommendations? (Y/N)")
+            
+    
     def error(self, error_text, e):
         print("\nError!", error_text)
         if e != None:
@@ -139,14 +174,8 @@ if __name__=='__main__':
         print()
         exit(0)
     
-    recommendations = recommender.get_recommendations(video)
-
-    if video in recommendations:
-        recommendations.remove(video)
-    print("Recommendations: ")
-    print("-----------------------------------------------")
-    for video_title in recommendations: 
-        print(video_title)
+    recommender.iterative_recommender(recommender.dataset,video)
+    
     
     print()
 
