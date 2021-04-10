@@ -106,7 +106,7 @@ class recommendation_system:
         similarity = enumerate([0.7*title_similarity[i] + 0.3*score[i] for i in range(len(score))])
         sorted_scores = sorted(similarity, key = lambda x: x[1], reverse=True)
         try:
-            sim_scores = sorted_scores[1:11] # Top 10 recommended
+            sim_scores = sorted_scores[1:12] # Top 10 recommended
             if sim_scores == []:
                 self.error("No recommendations found!",None)
 
@@ -140,6 +140,9 @@ if __name__=='__main__':
         exit(0)
     
     recommendations = recommender.get_recommendations(video)
+
+    if video in recommendations:
+        recommendations.remove(video)
     print("Recommendations: ")
     print("-----------------------------------------------")
     for video_title in recommendations: 
