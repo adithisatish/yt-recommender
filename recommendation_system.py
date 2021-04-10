@@ -18,11 +18,16 @@ import matplotlib as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 import sys
+import time
 
 class recommendation_system:
 
     def __init__(self):
-        self.dataset = pd.read_csv("video_details.csv")
+        try:
+            # self.dataset = pd.read_csv("video_details.csv")
+            self.dataset = pd.read_csv("test_videos1.csv")
+        except Exception as e:
+            self.error("No videos found!", e)
 
 # ## Helper functions
     def strip_views(self,string): # convert the string values to integers
@@ -67,8 +72,7 @@ class recommendation_system:
 
             return videos
         except Exception as e:
-            print("Error:", e)
-            return None #exit()
+            self.error("Preprocessing Failed!", e)
 
     def score_att(self, view, likes, dislikes): # to score based on quality of video
         return (likes + dislikes)/view
@@ -77,6 +81,10 @@ class recommendation_system:
         videos = self.preprocess(self.dataset)
         
         index = videos[videos['Video Title']==title].index.values
+        if list(index) == []:
+            self.error("Video not found!", None)
+        # if index == None:
+        #     self.error("Video not found!",None)
         # Title Similarity
 
         tfidf = TfidfVectorizer(stop_words='english')
@@ -96,18 +104,33 @@ class recommendation_system:
         
         # Combining Title as well as Attribute Similarity - Weighted
         similarity = enumerate([0.7*title_similarity[i] + 0.3*score[i] for i in range(len(score))])
-
-        sim_scores = sorted(similarity, key = lambda x: x[1], reverse=True)[1:11] # Top 10 recommended
+        sorted_scores = sorted(similarity, key = lambda x: x[1], reverse=True)
+        try:
+            sim_scores = sorted_scores[1:11] # Top 10 recommended
+        except Exception as e:
+            if len(sorted_scores<11):
+                sim_scores = sorted_scores[1:-1]
         video_titles = [i[0] for i in sim_scores]
         return list(videos['Video Title'].iloc[video_titles])
+
+    def error(self, error_text, e):
+        print("\nError!", error_text)
+        if e != None:
+            print("---------------------")
+            print("Python resulted in error:",e)
+        print("Terminating Program...")
+        time.sleep(3)
+        print()
+        exit(0)
 
 
 if __name__=='__main__':
     video = sys.argv[1]
     recommender = recommendation_system()
+    recommendations = recommender.get_recommendations(video)
     print("Recommendations: ")
     print("-----------------------------------------------")
-    for video_title in recommender.get_recommendations(video): 
+    for video_title in recommendations: 
         print(video_title)
     
     print()
