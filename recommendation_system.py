@@ -17,93 +17,100 @@ import numpy as np
 import matplotlib as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+import sys
 
+class recommendation_system:
 
-# videos.head()
+    def __init__(self):
+        self.dataset = pd.read_csv("video_details.csv")
 
 # ## Helper functions
-
-def strip_views(string): # convert the string values to integers
-    string = string.split(' ')[0]
-    number = int(string.replace(",",""))
-    return number
-
-def strip_likes(string): # convert string values to appropriate integers
-    temp = string.split(' ')[0]
-    try:
-        if 'K' in temp:
-            temp = temp.replace("K","")
-            number = int(float(temp)*1000)
-        elif 'M' in temp:
-            temp = temp.replace("M","")
-            number = int(float(temp)*1000000)
-        else:
-            number = int(temp)
+    def strip_views(self,string): # convert the string values to integers
+        string = string.split(' ')[0]
+        number = int(string.replace(",",""))
         return number
-   
-    except Exception as e:
-        print(string)
-        print("Error:", e)
 
-def invert_dislikes(number): # This is to account for the decrease in quality when people dislike videos
-    if number == 0:
-        return number
-    return -number
-
-# ## Function to preprocess data
-
-def preprocess(videos):
-    # global videos
-    try:
-        videos = videos.drop(columns=["Comments"]) # dropping comments as inclusion leads to unneccesary complications
-        videos = videos.dropna()
-        videos = videos[videos['Likes on Video']!='LIKE'] # special case 
-        videos['Views'] = videos['Views'].apply(strip_views)
-        videos['Likes on Video'] = videos['Likes on Video'].apply(strip_likes)
-        videos["Dislikes on Video"] = videos['Dislikes on Video'].apply(strip_likes)
-        videos["Dislikes on Video"] = videos['Dislikes on Video'].apply(invert_dislikes)
-
-        return videos
-    except Exception as e:
-        print("Error:", e)
-        return None #exit()
-
-def score_att(view, likes, dislikes): # to score based on quality of video
-    return (likes + dislikes)/view
-
-def recommender(link):
-    videos = pd.read_csv("video_details.csv")
-    videos = preprocess(videos)
+    def strip_likes(self,string): # convert string values to appropriate integers
+        temp = string.split(' ')[0]
+        try:
+            if 'K' in temp:
+                temp = temp.replace("K","")
+                number = int(float(temp)*1000)
+            elif 'M' in temp:
+                temp = temp.replace("M","")
+                number = int(float(temp)*1000000)
+            else:
+                number = int(temp)
+            return number
     
-    index = videos[videos['Video Link']==link].index.values
-    # Title Similarity
+        except Exception as e:
+            print(string)
+            print("Error:", e)
 
-    tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform(videos['Video Title'])  
-    cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix) # cosine similarity used
-    title_similarity = list(cosine_sim[index[0]]) 
+    def invert_dislikes(self,number): # This is to account for the decrease in quality when people dislike videos
+        if number == 0:
+            return number
+        return -number
 
-    # Attribute Similarity - Views, Likes, Dislikes
-    
-    attributes = ['Views','Likes on Video','Dislikes on Video']
-    video_att = videos[attributes]
+    # ## Function to preprocess data
 
-    score = []
+    def preprocess(self,videos):
+        # global videos
+        try:
+            videos = videos.drop(columns=["Comments"]) # dropping comments as inclusion leads to unneccesary complications
+            videos = videos.dropna()
+            videos = videos[videos['Likes on Video']!='LIKE'] # special case 
+            videos['Views'] = videos['Views'].apply(self.strip_views)
+            videos['Likes on Video'] = videos['Likes on Video'].apply(self.strip_likes)
+            videos["Dislikes on Video"] = videos['Dislikes on Video'].apply(self.strip_likes)
+            videos["Dislikes on Video"] = videos['Dislikes on Video'].apply(self.invert_dislikes)
 
-    for index, row in video_att.iterrows():
-        score.append(score_att(row['Views'],row['Likes on Video'], row['Dislikes on Video']))
-    
-    # Combining Title as well as Attribute Similarity - Weighted
-    similarity = enumerate([0.7*title_similarity[i] + 0.3*score[i] for i in range(len(score))])
+            return videos
+        except Exception as e:
+            print("Error:", e)
+            return None #exit()
 
-    sim_scores = sorted(similarity, key = lambda x: x[1], reverse=True)[1:11] # Top 10 recommended
-    video_titles = [i[0] for i in sim_scores]
-    return videos['Video Title'].iloc[video_titles]
+    def score_att(self, view, likes, dislikes): # to score based on quality of video
+        return (likes + dislikes)/view
+
+    def get_recommendations(self, title):
+        videos = self.preprocess(self.dataset)
+        
+        index = videos[videos['Video Title']==title].index.values
+        # Title Similarity
+
+        tfidf = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = tfidf.fit_transform(videos['Video Title'])  
+        cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix) # cosine similarity used
+        title_similarity = list(cosine_sim[index[0]]) 
+
+        # Attribute Similarity - Views, Likes, Dislikes
+        
+        attributes = ['Views','Likes on Video','Dislikes on Video']
+        video_att = videos[attributes]
+
+        score = []
+
+        for index, row in video_att.iterrows():
+            score.append(self.score_att(row['Views'],row['Likes on Video'], row['Dislikes on Video']))
+        
+        # Combining Title as well as Attribute Similarity - Weighted
+        similarity = enumerate([0.7*title_similarity[i] + 0.3*score[i] for i in range(len(score))])
+
+        sim_scores = sorted(similarity, key = lambda x: x[1], reverse=True)[1:11] # Top 10 recommended
+        video_titles = [i[0] for i in sim_scores]
+        return list(videos['Video Title'].iloc[video_titles])
 
 
 if __name__=='__main__':
-    dataset = pd.read_csv("video_details.csv")
-    recommendations = recommender("https://www.youtube.com/watch?v=imA5NPX4ucU")
-    print(recommendations)
+    video = sys.argv[1]
+    recommender = recommendation_system()
+    print("Recommendations: ")
+    print("-----------------------------------------------")
+    for video_title in recommender.get_recommendations(video): 
+        print(video_title)
+    
+    print()
+
 
 
