@@ -22,12 +22,12 @@ import time
 
 class recommendation_system:
 
-    def __init__(self):
+    def __init__(self, dataset):
         try:
-            # self.dataset = pd.read_csv("video_details.csv")
-            self.dataset = pd.read_csv("test_videos1.csv")
+            self.dataset = pd.read_csv(dataset)
+            # self.dataset = pd.read_csv("test_videos1.csv")
         except Exception as e:
-            self.error("No videos found!", e)
+            self.error("Database of videos not found!", e)
 
 # ## Helper functions
     def strip_views(self,string): # convert the string values to integers
@@ -72,7 +72,7 @@ class recommendation_system:
 
             return videos
         except Exception as e:
-            self.error("Preprocessing Failed!", e)
+            self.error("Preprocessing failed - atrribute mismatch!", e)
 
     def score_att(self, view, likes, dislikes): # to score based on quality of video
         return (likes + dislikes)/view
@@ -125,8 +125,17 @@ class recommendation_system:
 
 
 if __name__=='__main__':
-    video = sys.argv[1]
-    recommender = recommendation_system()
+    try:
+        dataset = sys.argv[1]
+        recommender = recommendation_system(dataset)
+        video = sys.argv[2]
+    except Exception as e:
+        print("No video title and/or dataset passed as command line arguments!")
+        print("Terminating Program...")
+        time.sleep(3)
+        print()
+        exit(0)
+    
     recommendations = recommender.get_recommendations(video)
     print("Recommendations: ")
     print("-----------------------------------------------")

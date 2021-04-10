@@ -1,11 +1,12 @@
-# Video Management Platform
+# Recommender for Video Management Platform
 
 A video management platform, similar to YouTube. 
 
-### Functionalities implemented:
+### Run:
+Execute ``` python recommendation _system.py <name of dataset> <title of video>```
 
-- Managing Videos
-- Managing Playlists
+### Feature implemented:
+
 - Recommending Videos
 
 ### Authors:
