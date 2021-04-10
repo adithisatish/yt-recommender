@@ -2,6 +2,9 @@
 
 A video management platform, similar to YouTube. 
 
+### Required Libraries:
+Execute ```pip install -r requirements.txt```
+
 ### Run:
 Execute ``` python recommendation _system.py <name of dataset> <title of video>```
 
