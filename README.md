@@ -22,10 +22,3 @@ A composite score factoring in every feature mentioned above is calculated and t
 
 ### Functioning:
 An object of class ```recommendation_system``` needs to be instantiated. Following that, the ```iterative_recommender``` method needs to be called after importing the file. The dataset (as a csv) and title of video need to be passed as system arguments. Input passed to the function must be the link of the video that is currently playing. 
-
-
-### Authors:
-
-- Adithi Satish
-- Manah Shetty
-- Shriya Shankar
