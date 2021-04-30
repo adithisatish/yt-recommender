@@ -1,6 +1,6 @@
-# Recommender for Video Management Platform
+# Video Recommender
 
-A video management platform, similar to YouTube. 
+A naive implementation of a context-based recommendation system to recommend similar videos to user based on the title provided. Uses a composite score consisting of title similarity (caluculated as the cosine similarity between the vectorized video titles) and the influence of popularity (i.e. factoring in likes, views and dislikes of the videos). Also incorporates user feedback to delete and replace unsatisfactory videos. 
 
 ### Required Libraries:
 Execute ```pip install -r requirements.txt```
